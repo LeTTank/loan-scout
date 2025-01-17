@@ -1,17 +1,14 @@
+import logging
 import multiprocessing
-from process import process_BoursoBank_simulation, afficher_tableau
-
-def fonction_a_executer(loanDuration, queue):
-    # Remplacez cette fonction par votre logique
-    print(f"Exécution avec loanDuration={loanDuration}")
-    result = process_BoursoBank_simulation(loanDuration)
-    queue.put(result)
+from process import processAllStuff
+from utils import order_data
 
 
-if __name__ == "__main__":
+def main():
+    logging.basicConfig(level=logging.INFO)
+
     # Liste des paramètres pour chaque exécution
     parametres = [(f'{i} ans') for i in range(15, 26)]
-
 
     # Initialiser la queue pour collecter les résultats
     queue = multiprocessing.Queue()
@@ -21,7 +18,7 @@ if __name__ == "__main__":
 
     # Initialisation et démarrage des processus
     for params in parametres:
-        p = multiprocessing.Process(target=fonction_a_executer, args=(params,queue))
+        p = multiprocessing.Process(target=processAllStuff, args=(params,queue))
         p.start()
         processus.append(p)
 
@@ -30,18 +27,16 @@ if __name__ == "__main__":
         p.join()
 
      # Récupérer les résultats de la queue
-    resultats = []
+    results = []
     while not queue.empty():
-        resultats.append(queue.get())
+        results.append(queue.get())
 
-    resultats_triees = sorted(resultats, key=lambda x: x['Durée emprunt'])
+    # Trier les résultats
+    sorted_results = sorted(results, key=lambda x: x['Durée emprunt'])
 
-    
-    # Afficher les résultats sous forme de tableau
-    afficher_tableau(resultats_triees)
-
-    exit()
+    # Affichage des résultats sous forme de tableau
+    order_data(sorted_results)
 
 
-
-
+if __name__ == "__main__":
+    main()
