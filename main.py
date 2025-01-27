@@ -32,7 +32,7 @@ def main():
         results.append(queue.get())
 
     # Trier les résultats
-    sorted_results = sorted(results, key=lambda x: x['Durée emprunt'])
+    sorted_results = sorted(results, key=lambda x: x['Durée'])
 
     # Affichage des résultats sous forme de tableau
     order_data(sorted_results)

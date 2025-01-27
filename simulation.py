@@ -2,11 +2,19 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
 import time
 
 def process_BoursoBank_simulation(loanDuration):
-    # Étape 1: Configurer le WebDriver
-    driver = webdriver.Chrome()
+
+    # Configurer les options pour Chrome
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")  # Mode sans tête
+    chrome_options.add_argument("--no-sandbox")  # Nécessaire dans Docker
+    chrome_options.add_argument("--disable-gpu")  # Option pour éviter certains bugs graphiques
+
+    ## Créer une instance de navigateur
+    driver = webdriver.Chrome(options=chrome_options)
 
     # URL cible
     url = "https://www.boursobank.com/credit/credit-immobilier?origine=2247&at_medium=sl&at_campaign=fr_sea&at_platform=google&at_term=&at_creation=ppi&at_variant=filrouge&origine=2247&at_medium=sl&at_campaign=fr_sea&at_platform=google&at_term=&at_creation=ppi&at_variant=filrouge&gad_source=1&gclid=Cj0KCQiA4fi7BhC5ARIsAEV1YiacKJ_nRth0h6cpsAtw750ZW6IqhC9Vc2BaarwT32sKlQfEapKXS8EaAoEsEALw_wcB#simulateur"
@@ -14,10 +22,7 @@ def process_BoursoBank_simulation(loanDuration):
     # Ouvrir la page avec Selenium
     driver.get(url)
 
-    # Récupérer le contenu HTML
-    html = driver.page_source
-
-    boutons_a_cliquer = ["Tout accepter", "Vos mensualités", "À deux"]
+    boutons_a_cliquer = ["Vos mensualités", "À deux"]
 
     for texte_bouton in boutons_a_cliquer:
         bouton = driver.find_element(By.XPATH, f"//span[text()='{texte_bouton}']")
@@ -116,8 +121,6 @@ def process_BoursoBank_simulation(loanDuration):
 
     rounded_card = driver.find_element(By.CLASS_NAME, "simulation-card")
     card_text = driver.execute_script("return arguments[0].innerText;", rounded_card)
-    print("Texte complet de la carte :\n")
-    print(card_text)
     driver.quit()
     
     return card_text
