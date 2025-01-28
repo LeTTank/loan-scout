@@ -3,7 +3,6 @@ kind: CronJob
 metadata:
   name: loan-scout-cronjob
 spec:
-  # Planification : ici, toutes les 5 minutes
   schedule: "0 20 * * *"
   jobTemplate:
     spec:
