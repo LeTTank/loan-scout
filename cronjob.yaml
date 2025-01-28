@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: loan-scout-cronjob
+spec:
+  # Planification : ici, toutes les 5 minutes
+  schedule: "0 20 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: loan-scout
+            image: ttank/loan-scout:latest
+            imagePullPolicy: IfNotPresent
+            command: ["python", "/app/main.py"]
+          restartPolicy: OnFailure
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
