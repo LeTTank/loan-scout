@@ -96,23 +96,23 @@ def extract_loan_data(data, loanDuration):
 
     # Expressions régulières pour extraire les valeurs numériques
     patterns = {
-        "Capital": r"Capital emprunté\s+([\d\s]+) €",
-        "Taux n. fixe": r"Taux standard\s+([\d,]+) %",
-        "Remise": r"Remise écoresponsable\s+([-\d,]+) %",
-        "Taux ap. remise": r"Taux après remise\(s\)\s+([\d,]+) %",
-        "Mensualité av. remise": r"Mensualité standard\s+([\d\s,]+) €",
-        "Mensualité ap. remise": r"Mensualité après remise\(s\)\s+([\d\s,]+) €",
-        "Assurance": r"assurance\s+([\d\s,]+) €/mois",
-        "Économies": r"Economies réalisées\s+([\d\s]+) €",
-        "Dossier": r"Frais de dossier\s+([\d\s]+) €"
+        "Capital": (r"Capital emprunté\s+([\d\s]+) €", " €", int),
+        "Taux n. fixe": (r"Taux standard\s+([\d,]+) %", " %", float),
+        "Remise": (r"Remise écoresponsable\s+([-\d,]+) %", " %", float),
+        "Taux ap. remise": (r"Taux après remise\(s\)\s+([\d,]+) %", " %", float),
+        "Mensualité av. remise": (r"Mensualité standard\s+([\d\s,]+) €", " €", float),
+        "Mensualité ap. remise": (r"Mensualité après remise\(s\)\s+([\d\s,]+) €", " €", float),
+        "Assurance": (r"assurance\s+([\d\s,]+) €/mois", " €", int),
+        "Économies": (r"Economies réalisées\s+([\d\s]+) €", " €", float),
+        "Dossier": (r"Frais de dossier\s+([\d\s]+) €", " €", int)
     }
 
     # Parcourir les motifs et extraire les valeurs correspondantes
-    for champ, pattern in patterns.items():
+    for champ, (pattern, unite, type_conv) in patterns.items():
         match = re.search(pattern, data)
         if match:
             # Nettoyer la valeur en supprimant les espaces et en remplaçant la virgule par un point
             valeur = match.group(1).replace(" ", "").replace(",", ".")
-            resultats[champ] = float(valeur)
+            resultats[champ] = f"{type_conv(valeur)}{unite}"
 
     return resultats

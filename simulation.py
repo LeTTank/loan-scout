@@ -5,6 +5,37 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 import time
 
+input_data = {
+    "text-input-0": "24",
+    "text-input-1": "2800",
+    "text-input-2": "0",
+    "text-input-3": "25",
+    "text-input-4": "2800",
+    "text-input-5": "0",
+    "text-input-6": "300000",
+    "text-input-7": "22500",
+    "text-input-9": "22500"
+}
+
+def click_radio_button(driver, name, index):
+    radio_buttons = driver.find_elements(By.NAME, name)
+    driver.execute_script("arguments[0].click();", radio_buttons[index])
+
+def select_dropdown_option(driver, dropdown_index, option_text):
+    wait = WebDriverWait(driver, 10)
+    dropdown_containers = driver.find_elements(By.CLASS_NAME, 'c-select__combobox')
+    dropdown_container = dropdown_containers[dropdown_index]
+    dropdown_container.click()
+    options = wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'c-select__option')))
+    for option in options:
+        if option.text == option_text:
+            option.click()
+            break
+
+def click_next_step(driver):
+    button = driver.find_element(By.XPATH, "//button[text()='Étape suivante']")
+    button.click()
+
 def process_BoursoBank_simulation(loanDuration):
 
     # Configurer les options pour Chrome
@@ -22,105 +53,43 @@ def process_BoursoBank_simulation(loanDuration):
     # Ouvrir la page avec Selenium
     driver.get(url)
 
+    # Cliquer sur les boutons initiaux
     boutons_a_cliquer = ["Vos mensualités", "À deux"]
-
     for texte_bouton in boutons_a_cliquer:
         bouton = driver.find_element(By.XPATH, f"//span[text()='{texte_bouton}']")
         bouton.click()
-        time.sleep(1)
+        time.sleep(0.2)
 
-    champ_texte = driver.find_element(By.ID, "text-input-0")
-    champ_texte.send_keys("24")
+    # Remplir les champs
+    for input_id, value in list(input_data.items())[:6]:  # Sélection des 3 premiers éléments
+        champ_texte = driver.find_element(By.ID, input_id)
+        champ_texte.send_keys(value)
 
-    champ_texte = driver.find_element(By.ID, "text-input-1")
-    champ_texte.send_keys("2800")
+    click_radio_button(driver, "isEmployee", 0)
+    click_radio_button(driver, "isEmployee", 2)
+    click_next_step(driver)
+    click_radio_button(driver, "isVefa", 1)
+    click_next_step(driver)
+    click_radio_button(driver, "residenceType", 0)
+    click_next_step(driver)
 
-    champ_texte = driver.find_element(By.ID, "text-input-2")
-    champ_texte.send_keys("0")
+    # Remplir les champs
+    for input_id, value in list(input_data.items())[-3:]:  # Sélection des 3 derniers éléments
+        champ_texte = driver.find_element(By.ID, input_id)
+        champ_texte.send_keys(value)
 
-    champ_texte = driver.find_element(By.ID, "text-input-3")
-    champ_texte.send_keys("25")
+    # Sélectionner la durée du prêt et le DPE
+    select_dropdown_option(driver, 0, f"{loanDuration}")
+    select_dropdown_option(driver, 1, "B")
 
-    champ_texte = driver.find_element(By.ID, "text-input-4")
-    champ_texte.send_keys("2800")
+    # Dernier bouton pour valider
+    click_next_step(driver)
 
-    champ_texte = driver.find_element(By.ID, "text-input-5")
-    champ_texte.send_keys("0")
-
-    radio_buttons = driver.find_elements(By.NAME, "isEmployee")
-    driver.execute_script("arguments[0].click();", radio_buttons[0])
-    driver.execute_script("arguments[0].click();", radio_buttons[2])
-
-    button = driver.find_element(By.XPATH, "//button[text()='Étape suivante']")
-    button.click()
-
-    radio_buttons = driver.find_elements(By.NAME, "isVefa")
-    driver.execute_script("arguments[0].click();", radio_buttons[1])
-
-    button = driver.find_element(By.XPATH, "//button[text()='Étape suivante']")
-    button.click()
-
-    radio_buttons = driver.find_elements(By.NAME, "residenceType")
-    driver.execute_script("arguments[0].click();", radio_buttons[0])
-
-    button = driver.find_element(By.XPATH, "//button[text()='Étape suivante']")
-    button.click()
-
-
-    champ_texte = driver.find_element(By.ID, "text-input-6")
-    champ_texte.send_keys("300000")
-
-    champ_texte = driver.find_element(By.ID, "text-input-7")
-    champ_texte.send_keys("22500")
-
-    champ_texte = driver.find_element(By.ID, "text-input-9")
-    champ_texte.send_keys("22500")
-
-
-
-    # Attendre que le conteneur de la liste déroulante soit cliquable
-    wait = WebDriverWait(driver, 10)
-
-    dropdown_containers = driver.find_elements(By.CLASS_NAME, 'c-select__combobox')
-    dropdown_container = dropdown_containers[0]
-
-    # Cliquer sur le conteneur pour ouvrir la liste déroulante
-    dropdown_container.click()
-
-    # Attendre que les options soient visibles
-    options = wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'c-select__option')))
-
-    # Parcourir les options pour sélectionner celle avec le texte "B"
-    for option in options:
-        if option.text == f"{loanDuration}":
-            option.click()
-            break
-
-    # Attendre que le conteneur de la liste déroulante soit cliquable
-    wait = WebDriverWait(driver, 10)
-
-    dropdown_containers = driver.find_elements(By.CLASS_NAME, 'c-select__combobox')
-    dropdown_container = dropdown_containers[1]
-
-    # Cliquer sur le conteneur pour ouvrir la liste déroulante
-    dropdown_container.click()
-
-    # Attendre que les options soient visibles
-    options = wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'c-select__option')))
-
-    # Parcourir les options pour sélectionner celle avec le texte "B"
-    for option in options:
-        if option.text == "B":
-            option.click()
-            break
-
-    button = driver.find_element(By.XPATH, "//button[text()='Étape suivante']")
-    button.click()
-
+    # Attendre le résultat et récupérer les données
     driver.implicitly_wait(10)
-
     rounded_card = driver.find_element(By.CLASS_NAME, "simulation-card")
     card_text = driver.execute_script("return arguments[0].innerText;", rounded_card)
     driver.quit()
     
+
     return card_text
