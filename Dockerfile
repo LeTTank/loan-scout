@@ -3,6 +3,7 @@ FROM python:3.13.1-slim
 
 # Mettre à jour les packages et installer les dépendances nécessaires
 RUN apt-get update && apt-get install -y \
+    git \
     wget \
     unzip \
     curl \
@@ -31,21 +32,18 @@ RUN apt-get update && apt-get install -y \
     chromium-driver \
     && rm -rf /var/lib/apt/lists/*
 
-
 # Vérifier les installations
 #RUN google-chrome-stable --version
 #RUN chromedriver --version
 
-
-
-# Définir le répertoire de travail
+# Cloner le dépôt GitHub
+ARG GIT_REPO="https://github.com/ThT-ank/loan-scout"
 WORKDIR /app
+RUN git clone $GIT_REPO .
 
-# Copier les fichiers nécessaires, packages selenium, requests et dataframe_image
-COPY requirements.txt .
-RUN pip install --upgrade pip
+# Installations Python
+RUN pip install --no-cache-dir --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
-COPY . .
 
 # Commande pour lancer le script
 CMD ["python", "main.py"]
